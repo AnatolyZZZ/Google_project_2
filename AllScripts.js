@@ -132,12 +132,10 @@ function debtReport () {
 
 
   for (sheet of workbook.getSheets().filter(filterByName).filter(filterByContract)) {
-    // console.log('sheetName',sheet.getName())
     const sheetName = sheet.getName();
     const idx = sheetName.indexOf('$');
     const companyName = idx === -1 ? sheetName : sheetName.slice(0, idx);
     const contractName = idx === -1 ? '' : sheetName.slice(idx+1);
-    // console.log('sheet', sheetName, 'idx', idx, 'company', companyName, 'contract', contractName);
     if (sheetName !== 'General scripts' & sheetName !=='ТОТАЛ' & sheetName !== 'Wrong data' & sheetName !=='Задолженность Отчет' & sheetName !=='Служебный') {
       if (!(companyName in data)) {
         data[companyName] = {}
@@ -220,46 +218,28 @@ function debtReport () {
       }
       // add debt on 01.01.18
       let prevDebt = -Number(sheet.getRange('I1').getCell(1,1).getValue());
-      // if (sheet.getRange('C8').getCell(1,1).getValue()) {
-      //   prevDebt = 0;
-      // }
-      // console.log(prevDebt)
-     
-       // console.log('company', companyName,'debt', prevDebt);
       shipments.unshift({duedate : new Date('01.01.2018'), amount : prevDebt})
       have_to_pay += prevDebt;
       shipment_end += prevDebt;
       shipment_start += prevDebt;
-      
-      const filterDueDate = (date) => (elt) => elt.duedate <= date;
 
-      // console.log('shipments start', shipment_start, 'shipment_end', shipment_end)
-      // console.log('payment_start', payment_start, 'payment_end', payment_end)
       cur_client.startDebt = (shipment_start - payment_start);
       cur_client.endDebt = (shipment_end - payment_end);
       cur_client.shipments = (shipment_end - shipment_start);
       cur_client.payments = (payment_end - payment_start);
       cur_client.overdueDebt = (have_to_pay - payment_end)
 
-      // console.log(cashflow)
-      // const cashflow_report_end = cashflow.filter(filterDueDate(endDate));
-
-      // console.log(cashflow_report_end.sort((a,b) => b.duedate - a.duedate))
-
       let targetDate = endDate;
       if (cur_client.overdueDebt > 10 ){
         let sum = cur_client.overdueDebt;
         for (shipment of shipments.reverse()) {
-          // console.log('sum', sum, 'amount', shipment.amount, 'due', shipment.duedate)
           sum -= shipment.amount;
-          // console.log(sum)
           if (sum <= 10) {
             targetDate = shipment.duedate;
             break;
           }
         } 
       }
-      // console.log('debd days?', endDate - targetDate)
       cur_client.debtDays = (endDate - targetDate)/1000/60/60/24;
     } //  if statement end
   } // loop all sheets end
@@ -269,17 +249,18 @@ function debtReport () {
   reportRange.clearContent();
 
   for (buyer in data) {
-    for (_contract in data[buyer]) {
-        const overdueDebt = data[buyer][_contract].overdueDebt;
+    for (contract in data[buyer]) {
+        const contarctData = data[buyer][contract]
+        const overdueDebt = contarctData.overdueDebt;
         if (overdueDebt <= 0) continue
-        const debtDays =  data[buyer][_contract].debtDays;
+        const debtDays =  contarctData.debtDays;
         if (debtDays <= 0) continue
         reportRange.getCell(j, 1).setValue(buyer);
-        reportRange.getCell(j, 2).setValue(_contract);
-        reportRange.getCell(j, 3).setValue(data[buyer][_contract].startDebt);
-        reportRange.getCell(j, 4).setValue(data[buyer][_contract].shipments);
-        reportRange.getCell(j, 5).setValue(data[buyer][_contract].payments);
-        reportRange.getCell(j, 6).setValue(data[buyer][_contract].endDebt);
+        reportRange.getCell(j, 2).setValue(contract);
+        reportRange.getCell(j, 3).setValue(contarctData.startDebt);
+        reportRange.getCell(j, 4).setValue(contarctData.shipments);
+        reportRange.getCell(j, 5).setValue(contarctData.payments);
+        reportRange.getCell(j, 6).setValue(contarctData.endDebt);
 
         reportRange.getCell(j, 7).setValue(overdueDebt);
         reportRange.getCell(j, 8).setValue(debtDays);
