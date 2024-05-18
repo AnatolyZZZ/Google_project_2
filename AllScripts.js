@@ -268,21 +268,26 @@ function debtReport () {
   const reportRange = reportSheet.getRange('A9:H');
   reportRange.clearContent();
 
-  for (_buyer in data) {
-    for (_contract in data[_buyer]) {
-      reportRange.getCell(j, 1).setValue(_buyer);
-      reportRange.getCell(j, 2).setValue(_contract);
-      reportRange.getCell(j, 3).setValue(data[_buyer][_contract].startDebt);
-      reportRange.getCell(j, 4).setValue(data[_buyer][_contract].shipments);
-      reportRange.getCell(j, 5).setValue(data[_buyer][_contract].payments);
-      reportRange.getCell(j, 6).setValue(data[_buyer][_contract].endDebt);
-      reportRange.getCell(j, 7).setValue(data[_buyer][_contract].overdueDebt);
-      reportRange.getCell(j, 8).setValue(data[_buyer][_contract].debtDays);
-      j++
+  for (buyer in data) {
+    for (_contract in data[buyer]) {
+        const overdueDebt = data[buyer][_contract].overdueDebt;
+        if (overdueDebt <= 0) continue
+        const debtDays =  data[buyer][_contract].debtDays;
+        if (debtDays <= 0) continue
+        reportRange.getCell(j, 1).setValue(buyer);
+        reportRange.getCell(j, 2).setValue(_contract);
+        reportRange.getCell(j, 3).setValue(data[buyer][_contract].startDebt);
+        reportRange.getCell(j, 4).setValue(data[buyer][_contract].shipments);
+        reportRange.getCell(j, 5).setValue(data[buyer][_contract].payments);
+        reportRange.getCell(j, 6).setValue(data[buyer][_contract].endDebt);
+
+        reportRange.getCell(j, 7).setValue(overdueDebt);
+        reportRange.getCell(j, 8).setValue(debtDays);
+        j++
     }
   }
 
-} // func end
+} 
 
 function generateInputs () {
   const buyers = new Set();
