@@ -248,14 +248,16 @@ function debtReport () {
   const reportRange = reportSheet.getRange('A9:H');
   reportRange.clearContent();
 
-  for (buyer in data) {
-    for (contract in data[buyer]) {
-        const contarctData = data[buyer][contract]
-        const overdueDebt = contarctData.overdueDebt;
-        if (overdueDebt <= 0) continue
-        const debtDays =  contarctData.debtDays;
-        if (debtDays <= 0) continue
-        reportRange.getCell(j, 1).setValue(buyer);
+  for (buyerData in data) {
+    for (let contract in data[buyerData]) {
+        const contarctData = data[buyerData][contract]
+        let overdueDebt = contarctData.overdueDebt;
+        // if (overdueDebt <= 0) continue
+        if (overdueDebt <= 0) overdueDebt = ''
+        let debtDays =  contarctData.debtDays;
+        if (debtDays <= 0) debtDays = ''
+        // if (debtDays <= 0) continue
+        reportRange.getCell(j, 1).setValue(buyerData);
         reportRange.getCell(j, 2).setValue(contract);
         reportRange.getCell(j, 3).setValue(contarctData.startDebt);
         reportRange.getCell(j, 4).setValue(contarctData.shipments);
